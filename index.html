@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.0.min.js">
+    </script>
+    <title>Temperature</title>
+</head>
+
+<body>
+
+    <style>
+        td {
+            text-align: left;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid;
+        }
+
+        .Parent {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .child1 {
+            width: 70%;
+            height: 100vh;
+            color: white;
+        }
+
+        .child2 {
+            width: 30%;
+            height: 100vh;
+        }
+    </style>
+
+    <style>
+        canvas {
+            width: 500px !important;
+            height: 300px !important;
+
+            width: 80% !important;
+            height: 80% !important;
+        }
+    </style>
+
+    </head>
+
+    <body>
+        <div class="Parent">
+            <div class="child1">
+                <center>
+                    <canvas id="my_line"> </canvas>
+                </center>
+            </div>
+
+            <div class="child2">
+                <center>
+                    <h3>Temperature</h3>
+
+                        <table id="my_data" cellpadding="7"></table>
+                </center>
+            </div>
+        </div>
+
+
+        <script>
+
+            getData();
+
+            async function getData() {
+                const response = await fetch(
+                    'https://raw.githubusercontent.com/RFUNN/JSON_Data/main/climate.json');
+                console.log(response);
+                const spisokgorodov = await response.json();
+                console.log(spisokgorodov);
+                length = spisokgorodov.length;
+                var gorod4 = null;
+                console.log(length);
+                for (i = 0; i < length; i++) {
+                    if (spisokgorodov[i].id==4){
+                        gorod4 = spisokgorodov[i];
+                        break;
+                    }
+                }
+                
+                let li = `<tr><th>Month</th><th>High</th><th>Low</th></tr>`;
+                labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                valuesHigh = [];
+                valuesLow = [];
+                for (i = 0; i < 12; i++) {
+                    valuesHigh.push(gorod4.monthlyAvg[i].high);
+                    valuesLow.push(gorod4.monthlyAvg[i].low);
+
+                    li += `<tr>
+                         <td>${labels[i]}</td>    
+                         <td>${gorod4.monthlyAvg[i].high} </td> 
+                         <td>${gorod4.monthlyAvg[i].low}</td>          
+                      </tr>`;
+                }
+                document.getElementById("my_data").innerHTML = li;
+
+                
+                Chart.defaults.global.defaultFontStyle = 'bold';
+                Chart.defaults.global.defaultFontFamily = '"Lato",sans-serif';
+                Chart.defaults.global.defaultFontColor = "#000";
+                Chart.defaults.global.defaultFontSize = 16;
+
+
+                new Chart(document.getElementById("my_line"), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: "High",
+                                borderColor: 'green',
+                                data: valuesHigh,
+                                fill: false
+                            },
+                            {
+                                label: "Low",
+                                borderColor: 'skyblue',
+                                data: valuesLow,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        legend: { display: true },
+                        title: {
+                            display: true,
+                            text: 'Temperature: ' + gorod4.city
+                        }
+                    }
+                });
+            }  
+        </script>
+        <script src=  
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js">  
+        </script>  
+    </body>
+</html>
